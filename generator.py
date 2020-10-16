@@ -15,14 +15,14 @@ argument_parser.add_argument('--length', '-l', dest='length', help='The number o
 argument_parser.add_argument('--test', action='store_true', dest='test', help='Prints out arguments and exits.')
 args = argument_parser.parse_args()
 
-color = tuple(map(int, args.color.split(',')))
-bgcolor = tuple(map(int, args.bgcolor.split(',')))
-height = int(args.height)
-width = int(args.width)
-update = int(args.update)
 length = int(args.length)
 
 if args.test:
+    color = tuple(map(int, args.color.split(',')))
+    bgcolor = tuple(map(int, args.bgcolor.split(',')))
+    height = int(args.height)
+    width = int(args.width)
+    update = int(args.update)
     print(f'Color: {color}')
     print(f'Background Color: {bgcolor}')
     print(f'Height: {height}')
@@ -38,43 +38,93 @@ skin = configparser.RawConfigParser()
 skin.optionxform = str 
 
 skin['Rainmeter'] = {
-    'Update': update,
+    'Update': args.update,
     'Author': 'chand1012'
 }
 
 skin['Variables'] = {
-    'Item': '.*<item>.*<title>(.*)</title>.*<link>(.*)</link>.*<author>(.*)</author>'
+    'Item': '(?(?=.*<item>).*<item>.*<title>(.*)<\/title>.*<link>(.*)<\/link>.*<author>(.*)<\/author>)'
 }
 
 skin['MeasureSite'] = {
     'Measure':'WebParser',
     'URL': args.url,
-    'RegExp': '(?siU)<title>(.*)</title>.*<link>(.*)</link>' + ('#Item#'*length)
+    'RegExp': '(?siU)<title>(.*)<\/title>.*<link>(.*)<\/link>' + ('#Item#'*(length))
 }
 
-string_index = 4
+string_index = 3
 
 for i in range(1, length+1):
     skin[f'MeasureItem{i}Title'] = {
         'Measure': 'WebParser',
         'URL': '[MeasureSite]',
-        'StringIndex': string_index
+        'StringIndex': string_index,
+        'DecodeCharacterReference': 1,
+        'RegExpSubstitute': 1,
+        'Substitute': '"^\s+":"","<!\[CDATA\[":"","\]\]>":"","!\[CDATA\[":"","\]\]":"'
     }
     string_index += 1
 
     skin[f'MeasureItem{i}Link'] = {
         'Measure': 'WebParser',
         'URL': '[MeasureSite]',
-        'StringIndex': string_index
+        'StringIndex': string_index,
+        'DecodeCharacterReference': 1,
+        'RegExpSubstitute': 1,
+        'Substitute': '"^\s+":"","<!\[CDATA\[":"","\]\]>":"","!\[CDATA\[":"","\]\]":"'
     }
     string_index += 1
 
     skin[f'MeasureItem{i}Author'] = {
         'Measure': 'WebParser',
         'URL': '[MeasureSite]',
-        'StringIndex': string_index
+        'StringIndex': string_index,
+        'DecodeCharacterReference': 1,
+        'RegExpSubstitute': 1,
+        'Substitute': '"^\s+":"","<!\[CDATA\[":"","\]\]>":"","!\[CDATA\[":"","\]\]":"'
     }
     string_index += 1
+
+skin['MeterBackground'] = {
+    'Meter': 'Image',
+    'W': args.width,
+    'H': args.height,
+    'SolidColor': args.bgcolor
+}
+
+# skin['MeterSite'] = {
+#     'Meter': 'String',
+#     'MeasureName': 'MeasureSiteTitle',
+#     'MeterStyle': 'TextStyle',
+#     'H'
+# }
+
+meter_range = range(1, length+1)
+measure_range = 1
+y_pos = 1
+if args.inverted:
+    measure_range = length
+
+for i in meter_range:
+    skin[f'MeterItem{i}'] = {
+        'Meter': 'String',
+        'MeasureName': f'MeasureItem{measure_range}Title',
+        'MeterStyle': 'TextStyle',
+        'Y': y_pos,
+        'LeftMouseUpAction':f'"[MeasureItem{measure_range}Link]"',
+        'ToolTipText': f'%1#CRLF#[MeasureItem{measure_range}Author]',
+        'DynamicVariables':1,
+        'FontColor': args.color,
+        'FontFace': args.font,
+        'FontSize': 11,
+        'ClipString': 1,
+        'AntiAlias': 1,
+        'Padding': '1,1,1,1',
+        'W': args.width
+    }
+    measure_range -= 1
+    y_pos += 15
+
 
 # Finish This. Needs Meters
 # https://docs.rainmeter.net/tips/rss-feed-tutorial/
