@@ -54,7 +54,7 @@ skin['MeasureSite'] = {
 
 string_index = 4
 
-for i in range(1, 11):
+for i in range(1, length+1):
     skin[f'MeasureItem{i}Title'] = {
         'Measure': 'WebParser',
         'URL': '[MeasureSite]',
