@@ -125,9 +125,5 @@ for i in meter_range:
     measure_range -= 1
     y_pos += 15
 
-
-# Finish This. Needs Meters
-# https://docs.rainmeter.net/tips/rss-feed-tutorial/
-
 with open('TerminalRSS.ini', 'w') as f:
     skin.write(f)
