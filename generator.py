@@ -12,6 +12,7 @@ argument_parser.add_argument('--color', '-c', dest='color', help='The primary te
 argument_parser.add_argument('--font', '-f', dest='font', help='The selected font.', default='Consolas')
 argument_parser.add_argument('--inverted', '-i', dest='inverted', action='store_false', help='Inverts the console so that it reads like a traditional RSS feed.')
 argument_parser.add_argument('--length', '-l', dest='length', help='The number of lines.', default='10')
+argument_parser.add_argument('--output', '-o', dest='output', help='File to output to.', default='TerminalRSS.ini')
 argument_parser.add_argument('--test', action='store_true', dest='test', help='Prints out arguments and exits.')
 args = argument_parser.parse_args()
 
@@ -125,5 +126,5 @@ for i in meter_range:
     measure_range -= 1
     y_pos += 15
 
-with open('TerminalRSS.ini', 'w') as f:
+with open(args.output, 'w') as f:
     skin.write(f)
